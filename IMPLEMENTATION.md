@@ -99,7 +99,9 @@ target-version = "py311"
 - `src/` layout (PEP 517 best practice)
 - Hatchling build backend (modern, fast)
 
-## 3. GaussianRational Implementation
+## 3. GaussianRational (Gauss) Implementation
+
+> **Naming convention:** The standard short name for a Gaussian rational is **`Gauss`** (corresponds to `Qi` in the current Python implementation). When referring specifically to a Gaussian integer (both denominators are 1), the standard short name is **`Gint`** (corresponds to `Zi`).
 
 ### 3.1 Class Design
 

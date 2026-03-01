@@ -14,7 +14,9 @@ pip install -e .
 
 ## Gaussian Integers & Rationals
 
-The SDK includes `Zi` (Gaussian integers, Z[i]) and `Qi` (Gaussian rationals, Q[i]) classes providing exact arithmetic for complex numbers with integer or rational components.
+The standard short name for a Gaussian rational in Pramana is **`Gauss`**, and for a Gaussian integer it is **`Gint`**. The Python SDK currently uses `Qi` (Q[i]) and `Zi` (Z[i]) as class names from the upstream library, which correspond to `Gauss` and `Gint` respectively.
+
+The SDK includes `Zi` (Gaussian integers, Z[i] / **Gint**) and `Qi` (Gaussian rationals, Q[i] / **Gauss**) classes providing exact arithmetic for complex numbers with integer or rational components.
 
 These classes are forked from [gaussian_integers](https://github.com/alreich/gaussian_integers) by **Alfred J. Reich, Ph.D.**, used under the MIT license. Dr. Reich's implementation provides exact arithmetic, number-theoretic operations (GCD, Extended Euclidean Algorithm, Gaussian primality testing), and the Modified Division Theorem based on Keith Conrad's ["The Gaussian Integers"](https://kconrad.math.uconn.edu/blurbs/ugradnumthy/Zinotes.pdf). See [NOTICE.md](NOTICE.md) for full attribution.
 
