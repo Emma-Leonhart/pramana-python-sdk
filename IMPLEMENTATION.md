@@ -467,7 +467,7 @@ config = PramanaConfig(
 ```python
 graph = PramanaGraph.from_file("foundation.pra")
 graph = PramanaGraph.from_sparql("http://localhost:7200/repositories/pramana")
-graph = PramanaGraph.from_api("https://pramana-data.ca")
+graph = PramanaGraph.from_api("https://pramana.dev")
 ```
 
 ## 7. Struct Pseudo-Classes

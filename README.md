@@ -1,6 +1,6 @@
 # pramana-python-sdk
 
-Python SDK for the [Pramana](https://pramana-data.ca) knowledge graph. Provides exact-arithmetic value types, item model mapping, and data source connectors for working with Pramana data in Python.
+Python SDK for the [Pramana](https://pramana.dev) knowledge graph. Provides exact-arithmetic value types, item model mapping, and data source connectors for working with Pramana data in Python.
 
 ## Status
 

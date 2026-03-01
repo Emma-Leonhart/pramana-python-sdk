@@ -233,7 +233,7 @@ class TestGint(TestCase):
         g = Gint(3, 4)
         self.assertEqual(g.pramana_key, "3,1,4,1")
         self.assertTrue(g.pramana_id)  # UUID is non-empty
-        self.assertTrue(g.pramana_url.startswith("https://pramana-data.ca/entity/"))
+        self.assertTrue(g.pramana_url.startswith("https://pramana.dev/entity/"))
         self.assertEqual(g.pramana_label, "pra:num:3,1,4,1")
         # Verify deterministic: same input = same id
         g2 = Gint(3, 4)

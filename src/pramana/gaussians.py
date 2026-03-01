@@ -350,7 +350,7 @@ class Gint:
 
     @property
     def pramana_url(self) -> str:
-        return f"https://pramana-data.ca/entity/{self.pramana_id}"
+        return f"https://pramana.dev/entity/{self.pramana_id}"
 
     @property
     def pramana_label(self) -> str:
@@ -783,7 +783,7 @@ class Gauss:
 
     @property
     def pramana_url(self) -> str:
-        return f"https://pramana-data.ca/entity/{self.pramana_id}"
+        return f"https://pramana.dev/entity/{self.pramana_id}"
 
     @property
     def pramana_label(self) -> str:

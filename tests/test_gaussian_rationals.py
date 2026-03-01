@@ -203,7 +203,7 @@ class TestGauss(TestCase):
         g = Gauss('3/2', '4/5')
         self.assertEqual(g.pramana_key, "3,2,4,5")
         self.assertTrue(g.pramana_id)
-        self.assertTrue(g.pramana_url.startswith("https://pramana-data.ca/entity/"))
+        self.assertTrue(g.pramana_url.startswith("https://pramana.dev/entity/"))
         self.assertEqual(g.pramana_label, "pra:num:3,2,4,5")
         # Deterministic
         g2 = Gauss('3/2', '4/5')
