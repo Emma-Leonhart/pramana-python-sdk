@@ -9,6 +9,12 @@ Python SDK for the [Pramana](https://pramana-data.ca) knowledge graph. Provides 
 ## Installation
 
 ```bash
+pip install pramana-lib
+```
+
+For development:
+
+```bash
 pip install -e .
 ```
 
@@ -73,7 +79,7 @@ pytest
 | Language | Repository | Package |
 |----------|-----------|---------|
 | C# / .NET | [pramana-dotnet-sdk](https://github.com/Emma-Leonhart/pramana-dotnet-sdk) | `Pramana.SDK` (NuGet) |
-| Python | **pramana-python-sdk** (this repo) | `pramana-sdk` (PyPI) |
+| Python | **pramana-python-sdk** (this repo) | `pramana-lib` (PyPI) |
 | TypeScript | [pramana-ts-sdk](https://github.com/Emma-Leonhart/pramana-ts-sdk) | `@pramana/sdk` (npm) |
 | JavaScript | [pramana-js-sdk](https://github.com/Emma-Leonhart/pramana-js-sdk) | `@pramana/sdk` (npm) |
 | Java | [pramana-java-sdk](https://github.com/Emma-Leonhart/pramana-java-sdk) | `org.pramana:pramana-sdk` (Maven) |
