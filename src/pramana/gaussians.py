@@ -711,3 +711,11 @@ class Qi:
             return Qi(sign + re, '-' + im)
         else:
             raise ValueError(f"Can't parse {qi_str}")
+
+
+# Pramana standard names
+Gauss = Qi
+"""Pramana standard alias for Qi (Gaussian Rational, Q[i])."""
+
+Gint = Zi
+"""Pramana standard alias for Zi (Gaussian Integer, Z[i])."""

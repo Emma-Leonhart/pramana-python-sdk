@@ -20,43 +20,43 @@ pip install -e .
 
 ## Gaussian Integers & Rationals
 
-The standard short name for a Gaussian rational in Pramana is **`Gauss`**, and for a Gaussian integer it is **`Gint`**. The Python SDK currently uses `Qi` (Q[i]) and `Zi` (Z[i]) as class names from the upstream library, which correspond to `Gauss` and `Gint` respectively.
+The Pramana standard names are **`Gauss`** (Gaussian rational, Q[i]) and **`Gint`** (Gaussian integer, Z[i]). The mathematical names `Qi` and `Zi` are also available as aliases.
 
-The SDK includes `Zi` (Gaussian integers, Z[i] / **Gint**) and `Qi` (Gaussian rationals, Q[i] / **Gauss**) classes providing exact arithmetic for complex numbers with integer or rational components.
+The SDK includes `Gauss`/`Qi` (Gaussian rationals) and `Gint`/`Zi` (Gaussian integers) classes providing exact arithmetic for complex numbers with integer or rational components.
 
 These classes are forked from [gaussian_integers](https://github.com/alreich/gaussian_integers) by **Alfred J. Reich, Ph.D.**, used under the MIT license. Dr. Reich's implementation provides exact arithmetic, number-theoretic operations (GCD, Extended Euclidean Algorithm, Gaussian primality testing), and the Modified Division Theorem based on Keith Conrad's ["The Gaussian Integers"](https://kconrad.math.uconn.edu/blurbs/ugradnumthy/Zinotes.pdf). See [NOTICE.md](NOTICE.md) for full attribution.
 
 ### Quick Example
 
 ```python
-from pramana.gaussians import Zi, Qi
+from pramana import Gauss, Gint
 
 # Gaussian integer arithmetic
-alpha = Zi(11, 3)   # 11 + 3i
-beta = Zi(1, 8)     # 1 + 8i
+alpha = Gint(11, 3)   # 11 + 3i
+beta = Gint(1, 8)     # 1 + 8i
 
 # Extended Euclidean Algorithm (Bezout coefficients)
-gcd, x, y = Zi.xgcd(alpha, beta)
+gcd, x, y = Gint.xgcd(alpha, beta)
 print(f"{alpha * x + beta * y} = {alpha} * {x} + {beta} * {y}")
 # (1-2j) = (11+3j) * (2-1j) + (1+8j) * 3j
 
 # Gaussian rational arithmetic (exact fractions)
-r = Qi(2, 3.4)          # 2 + 17/5 i
-s = Qi("4/6", "-1/7")   # 2/3 - 1/7 i
-print(r * s)             # exact rational result
+r = Gauss(2, 3.4)          # 2 + 17/5 i
+s = Gauss("4/6", "-1/7")   # 2/3 - 1/7 i
+print(r * s)                # exact rational result
 
-# Division returns Qi when not exact, Zi when it is
-print(Zi(4, 5) / Zi(1, -2))  # Qi('-6/5', '13/5')
-print(Zi(4, 8) / 2)          # Zi(2, 4)
+# Division returns Gauss when not exact, Gint when it is
+print(Gint(4, 5) / Gint(1, -2))  # Qi('-6/5', '13/5')
+print(Gint(4, 8) / 2)            # Zi(2, 4)
 
 # Primality testing
-print(Zi.is_gaussian_prime(3))  # True (3 ≡ 3 mod 4)
-print(Zi.is_gaussian_prime(5))  # False (5 = (2+i)(2-i))
+print(Gint.is_gaussian_prime(3))  # True (3 ≡ 3 mod 4)
+print(Gint.is_gaussian_prime(5))  # False (5 = (2+i)(2-i))
 ```
 
 ## Key Features (Planned)
 
-- **Pramana GaussianRational** - The `(A,B,C,D)` canonical form with UUID v5 identity, built on top of Zi/Qi
+- **Pramana GaussianRational** - The `(A,B,C,D)` canonical form with UUID v5 identity, built on top of Gauss/Gint
 - **Deterministic Pramana IDs** - UUID v5 generation matching the canonical Pramana web app
 - **ORM-style entity mapping** - `@pramana_entity` decorator with proposition-backed fields
 - **Multiple data sources** - `.pra` files, SPARQL, REST API, SQLite
