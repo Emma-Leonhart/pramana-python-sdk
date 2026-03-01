@@ -5,7 +5,7 @@ Similarly, a Gaussian rational is a complex number whose real and imaginary part
 rational numbers.
 
 In mathematics, Gaussian integers and rationals are denoted by Z[i] & Q[i], resp.
-So, here, Zi & Qi denote the Gaussian integer and rational classes, respectively.
+In Pramana, these are called Gint and Gauss, respectively.
 
 The classes support the arithmetic of Gaussian integers and rationals using the
 operators: +, -, *, /, //, %, **, +=, -=, *=, and /=, along with a modified version
@@ -13,11 +13,11 @@ of divmod, modified_divmod, and two functions related to the Greatest Common Div
 gcd and xgcd.
 
 Example:
-  > from pramana.gaussians import Zi, Qi
+  > from pramana import Gint, Gauss
   >
-  > alpha = Zi(11, 3)
-  > beta = Zi(1, 8)
-  > a, x, y = Zi.xgcd(alpha, beta)
+  > alpha = Gint(11, 3)
+  > beta = Gint(1, 8)
+  > a, x, y = Gint.xgcd(alpha, beta)
   > print(f"{alpha * x + beta * y} = {alpha} * {x} + {beta} * {y}")
   > (1-2j) = (11+3j) * (2-1j) + (1+8j) * 3j
 
@@ -26,9 +26,9 @@ Original implementation:
   Source: https://github.com/alreich/gaussian_integers
   License: MIT
 
-  Forked into the Pramana Python SDK with modifications for knowledge graph
-  integration. The original Zi and Qi classes are preserved; see NOTICE.md
-  for full attribution.
+  Forked into the Pramana Python SDK and refactored: classes renamed from
+  Zi/Qi to Gint/Gauss per Pramana naming conventions. The original Zi and Qi
+  names are preserved as aliases. See NOTICE.md for full attribution.
 """
 
 __original_author__ = "Alfred J. Reich, Ph.D."
@@ -46,17 +46,17 @@ from functools import wraps
 
 
 def to_gaussian_rational(number):
-    """Given a number, return its equivalent Gaussian rational."""
-    if isinstance(number, (int, float, complex, Zi, Fraction)):
-        return Qi(number)
-    elif isinstance(number, Qi):
+    """Given a number, return its equivalent Gaussian rational (Gauss)."""
+    if isinstance(number, (int, float, complex, Gint, Fraction)):
+        return Gauss(number)
+    elif isinstance(number, Gauss):
         return number
     else:
         raise TypeError(f"'{number}' cannot be cast into a Gaussian rational")
 
 
 def gaussian_rational(fnc):
-    """For use as a property that casts an argument into Gaussian rational."""
+    """For use as a decorator that casts an argument into a Gaussian rational."""
     @wraps(fnc)
     def gaussian_rational_wrapper(arg, num):
         qi = to_gaussian_rational(num)
@@ -64,10 +64,10 @@ def gaussian_rational(fnc):
     return gaussian_rational_wrapper
 
 
-class Zi:
-    """Gaussian Integer Class with arithmetic and related functionality.
+class Gint:
+    """Gaussian Integer (Z[i]) with arithmetic and number-theoretic functionality.
 
-    A Gaussian integer, Zi, has two integer input values, re & im.
+    A Gaussian integer has two integer components, re & im, representing re + im*i.
     Floats and complex numbers can be entered, but they will be rounded to the
     nearest integers. If a complex number is provided for re, then the value of
     im will be ignored. Additionally, the complex number's components, real & imag,
@@ -87,18 +87,18 @@ class Zi:
             if im is None:
                 self.__re = round(re.real)
                 self.__im = round(re.imag)
-            elif isinstance(im, (complex, Zi)):
-                self.__re = Zi(re)
-                self.__im = Zi(im)
+            elif isinstance(im, (complex, Gint)):
+                self.__re = Gint(re)
+                self.__im = Gint(im)
             else:
                 raise Exception(f"Inputs incompatible: {re} and {im}")
-        elif isinstance(re, Zi):
+        elif isinstance(re, Gint):
             if im is None:
                 self.__re = re.real
                 self.__im = re.imag
-            elif isinstance(im, (complex, Zi)):
-                self.__re = Zi(re)
-                self.__im = Zi(im)
+            elif isinstance(im, (complex, Gint)):
+                self.__re = Gint(re)
+                self.__im = Gint(im)
             else:
                 raise Exception(f"Inputs incompatible: {re} and {im}")
         elif re is None:
@@ -120,9 +120,9 @@ class Zi:
 
     def __repr__(self) -> str:
         if self.imag == 0:
-            return f"Zi({self.real})"
+            return f"Gint({self.real})"
         else:
-            return f"Zi({self.real}, {self.imag})"
+            return f"Gint({self.real}, {self.imag})"
 
     def __str__(self) -> str:
         if self.imag == 0:
@@ -136,42 +136,42 @@ class Zi:
 
     def __add__(self, other):
         """Implements the + operator: self + other"""
-        return Zi(self.real + other.real, self.imag + other.imag)
+        return Gint(self.real + other.real, self.imag + other.imag)
 
     def __radd__(self, other):
         """The reflected (swapped) operand for addition: other + self"""
-        return Zi(other) + self
+        return Gint(other) + self
 
     def __iadd__(self, other):
         """Implements the += operation: self += other"""
-        return Zi(self.real + other.real, self.imag + other.imag)
+        return Gint(self.real + other.real, self.imag + other.imag)
 
     def __sub__(self, other):
         """Implements the subtraction operator: self - other"""
-        return Zi(self.real - other.real, self.imag - other.imag)
+        return Gint(self.real - other.real, self.imag - other.imag)
 
     def __rsub__(self, other):
         """The reflected (swapped) operand for subtraction: other - self"""
-        return Zi(other) - self
+        return Gint(other) - self
 
     def __isub__(self, other):
         """Implements the -= operation: self -= other"""
-        return Zi(self.real - other.real, self.imag - other.imag)
+        return Gint(self.real - other.real, self.imag - other.imag)
 
     def __mul__(self, other):  # self * other
         """Implements the multiplication operator: self * other"""
-        if isinstance(other, Qi):
-            return Qi(self) * other
+        if isinstance(other, Gauss):
+            return Gauss(self) * other
         else:
             a = self.real
             b = self.imag
             c = round(other.real)
             d = round(other.imag)
-            return Zi(a * c - b * d, a * d + b * c)
+            return Gint(a * c - b * d, a * d + b * c)
 
     def __rmul__(self, other):  # other * self
         """The reflected (swapped) operand for multiplication: other * self"""
-        return Zi(other) * self
+        return Gint(other) * self
 
     def __imul__(self, other):
         """Implements the *= operation: self *= other"""
@@ -179,18 +179,18 @@ class Zi:
         b = self.imag
         c = round(other.real)
         d = round(other.imag)
-        return Zi(a * c - b * d, a * d + b * c)
+        return Gint(a * c - b * d, a * d + b * c)
 
     def __pow__(self, n: int, modulo=None):
         """Implements the ** operator: self ** n.
 
-        If n == 0, then Zi(1, 0) is returned. If n < 0, then the Gaussian
-        rational, Qi, for 1 / self**n is returned. Otherwise, self ** n is returned.
+        If n == 0, then Gint(1, 0) is returned. If n < 0, then the Gaussian
+        rational, Gauss, for 1 / self**n is returned. Otherwise, self ** n is returned.
         """
         result = self
         if isinstance(n, int):
             if n == 0:
-                result = Zi(1)  # "1"
+                result = Gint(1)  # "1"
             elif n > 0:
                 for _ in range(n - 1):
                     result = result * self
@@ -199,52 +199,52 @@ class Zi:
         return result
 
     def __complex__(self) -> complex:
-        """Return the complex number that corresponds to this Zi."""
+        """Return the complex number that corresponds to this Gint."""
         return complex(self.real, self.imag)
 
     def __neg__(self):
-        """Negate this Zi."""
-        return Zi(-self.real, -self.imag)
+        """Negate this Gint."""
+        return Gint(-self.real, -self.imag)
 
     def __eq__(self, other: Complex) -> bool:
-        """Return True if this Zi equals other."""
+        """Return True if this Gint equals other."""
         return (self.real == other.real) and (self.imag == other.imag)
 
     def __ne__(self, other) -> bool:
-        """Return True if this Zi does NOT equal other."""
+        """Return True if this Gint does NOT equal other."""
         return (self.real != other.real) or (self.imag != other.imag)
 
     @gaussian_rational
     def __truediv__(self, other):  # self / other
-        """Divide self by other, exactly, and return the resulting Gaussian rational or integer.
+        """Divide self by other, exactly, and return the resulting Gauss or Gint.
 
-        The divisor (other) is first cast into a Gaussian rational (Qi) prior to division.
+        The divisor (other) is first cast into a Gaussian rational (Gauss) prior to division.
         """
-        return Qi(self) / other  # Despite the Qi, this could still output a Zi
+        return Gauss(self) / other  # Could still output a Gint
 
     @gaussian_rational
     def __rtruediv__(self, other):  # other / self
-        """Divide other by self, exactly, and return the resulting Gaussian rational or integer.
+        """Divide other by self, exactly, and return the resulting Gauss or Gint.
 
-        The dividend (other) is first cast into a Gaussian rational (Qi) prior to division.
+        The dividend (other) is first cast into a Gaussian rational (Gauss) prior to division.
         """
-        return other / Qi(self)
+        return other / Gauss(self)
 
     def __floordiv__(self, other):  # self // other
         """Implements the // operator using 'round', instead of 'floor'.
 
         Returns the closest integer approximation to the quotient, self / other,
-        as a Zi, by rounding the real and imag parts after division, not flooring.
-        'other' can be an int, float, complex, or Zi.
+        as a Gint, by rounding the real and imag parts after division, not flooring.
+        'other' can be an int, float, complex, or Gint.
         """
-        if isinstance(other, (int, float, complex, Zi)):
-            return Zi(complex(self) / complex(other))
+        if isinstance(other, (int, float, complex, Gint)):
+            return Gint(complex(self) / complex(other))
         else:
             raise TypeError(f"{other} is not a supported type.")
 
     def __rfloordiv__(self, other):  # other // self
         if isinstance(other, (int, float, complex)):
-            return Zi(complex(other) / complex(self))
+            return Gint(complex(other) / complex(self))
         else:
             raise TypeError(f"{other} is not a supported type.")
 
@@ -254,14 +254,14 @@ class Zi:
         Returns the remainder of the result from modified_divmod
         """
         if isinstance(other, (int, float, complex)):
-            oth = Zi(other)
+            oth = Gint(other)
         else:
             oth = other
-        _, r = Zi.modified_divmod(self, oth)
+        _, r = Gint.modified_divmod(self, oth)
         return r
 
     def __hash__(self):
-        """Allow this Zi to be hashed."""
+        """Allow this Gint to be hashed."""
         return hash((self.real, self.imag))
 
     def __abs__(self) -> float:
@@ -276,29 +276,29 @@ class Zi:
 
     @staticmethod
     def eye():
-        """Return i = Zi(0, 1)"""
-        return Zi(0, 1)
+        """Return i = Gint(0, 1)"""
+        return Gint(0, 1)
 
     @staticmethod
     def units():
-        """Returns the list of four units, [1, -1, i, -i], as Zis."""
-        return [Zi(1), -Zi(1), Zi.eye(), -Zi.eye()]
+        """Returns the list of four units, [1, -1, i, -i], as Gints."""
+        return [Gint(1), -Gint(1), Gint.eye(), -Gint.eye()]
 
     @property
     def is_unit(self):
-        """Returns True if this Zi is a unit."""
-        return self in Zi.units()
+        """Returns True if this Gint is a unit."""
+        return self in Gint.units()
 
     @staticmethod
     def two():
         """Returns 1+i, because a Gaussian integer has an even norm if and only if
         it is a multiple of 1+i."""
-        return Zi(1, 1)
+        return Gint(1, 1)
 
     @property
     def conjugate(self):
         """Return the conjugate of this Gaussian integer"""
-        return Zi(self.real, - self.imag)
+        return Gint(self.real, - self.imag)
 
     @property
     def norm(self) -> int:
@@ -312,21 +312,21 @@ class Zi:
     @staticmethod
     def random(re1=-100, re2=100, im1=-100, im2=100):
         """Return a random Gaussian integer with re1 <= re <= re2 and im1 <= im <= im2."""
-        return Zi(randint(re1, re2), randint(im1, im2))
+        return Gint(randint(re1, re2), randint(im1, im2))
 
     def associates(self):
-        """Return a list of this Zi's three associates"""
-        us = Zi.units()
+        """Return a list of this Gint's three associates"""
+        us = Gint.units()
         return list(map(lambda u: u * self, us[1:]))  # skip multiplying by 1
 
     def is_associate(self, other):
-        """Return True if the other Zi is an associate of this Zi
+        """Return True if the other Gint is an associate of this Gint
 
         Otherwise, return False.
         """
         q = self // other
         if q:
-            if q in Zi.units():
+            if q in Gint.units():
                 return True
             else:
                 return False
@@ -335,7 +335,7 @@ class Zi:
 
     def to_gaussian_rational(self):
         """Convert this Gaussian integer to an equivalent Gaussian rational."""
-        return Qi(self.real, self.imag)
+        return Gauss(self.real, self.imag)
 
     @staticmethod
     def norms_divide(a, b):
@@ -353,7 +353,7 @@ class Zi:
     @staticmethod
     def from_array(arr):
         """Convert a two-element array into a Gaussian integer."""
-        return Zi(int(arr[0]), int(arr[1]))
+        return Gint(int(arr[0]), int(arr[1]))
 
     # See https://kconrad.math.uconn.edu/blurbs/ugradnumthy/Zinotes.pdf
     @staticmethod
@@ -364,7 +364,7 @@ class Zi:
         r.norm < b.norm / 2. This is the Modified Division
         Theorem described in 'The Gaussian Integers' by Keith Conrad
         """
-        q = Zi(complex(a * b.conjugate) / b.norm)  # Zi rounds the complex result here
+        q = Gint(complex(a * b.conjugate) / b.norm)  # Gint rounds the complex result here
         r = a - b * q
         return q, r
 
@@ -375,14 +375,14 @@ class Zi:
 
         This function implements the Euclidean algorithm for Gaussian integers.
         """
-        zero = Zi()
+        zero = Gint()
         if a * b == zero:
             raise ValueError(f"Both inputs must be non-zero: {a} and {b}")
         else:
             r1, r2 = a, b
             while r2 != zero:
                 r0, r1 = r1, r2
-                q, r2 = Zi.modified_divmod(r0, r1)  # q only used in call to print, below
+                q, r2 = Gint.modified_divmod(r0, r1)
                 if verbose:
                     print(f"   {r0} = {r1} * {q} + {r2}")
         return r1
@@ -396,10 +396,10 @@ class Zi:
         written as gcd = alpha * x + beta * y. x & y are called
         Bezout's coefficients.
         """
-        if isinstance(alpha, Zi) and isinstance(beta, Zi):
-            zero = Zi()
+        if isinstance(alpha, Gint) and isinstance(beta, Gint):
+            zero = Gint()
         else:
-            raise ValueError(f"Inputs must be two Zis.")
+            raise ValueError(f"Inputs must be two Gints.")
 
         # NOTE: Many of the lines below perform two assignment operations
         a, b = alpha, beta
@@ -418,7 +418,7 @@ class Zi:
         depending on whether x is congruent to y modulo z;
         the second value is the result of computing (a - b) / c."""
         w = (a - b) / c
-        if isinstance(w, Zi):
+        if isinstance(w, Gint):
             return True, w
         else:
             return False, w
@@ -426,21 +426,18 @@ class Zi:
     @staticmethod
     def is_relatively_prime(a, b) -> bool:
         """Returns True if a and b are relatively prime, otherwise it returns false."""
-        return Zi.gcd(a, b) in Zi.units()
+        return Gint.gcd(a, b) in Gint.units()
 
-    # Defining "is_gaussian_prime" as a staticmethod allows it to be easily used on both
-    # Gaussian integers and real integers. If it had been defined as a normal method,
-    # then it wouldn't work on real integers unless they are first converted into Zi's.
     @staticmethod
     def is_gaussian_prime(x) -> bool:
         """Return True if x is a Gaussian prime.  Otherwise, return False.
-        x can be an integer or a Gaussian integer.
+        x can be an integer or a Gaussian integer (Gint).
 
         See https://mathworld.wolfram.com/GaussianPrime.html
         """
         re = im = norm = None
 
-        if isinstance(x, Zi):
+        if isinstance(x, Gint):
             re = abs(x.real)
             im = abs(x.imag)
             norm = x.norm
@@ -485,12 +482,12 @@ def isprime(n: int) -> bool:
         return True
 
 
-class Qi:
-    """Gaussian Rational Number Class
+class Gauss:
+    """Gaussian Rational (Q[i]) with exact fractional arithmetic.
 
     A Gaussian rational is a complex number whose real and imaginary parts
     are both rational numbers (fractions.Fraction). Supports full arithmetic
-    with automatic type coercion from int, float, complex, Zi, and Fraction.
+    with automatic type coercion from int, float, complex, Gint, and Fraction.
     """
 
     __max_denominator = 1_000_000
@@ -501,12 +498,12 @@ class Qi:
             self.__real = re
         elif isinstance(re, (str, int, float)):
             self.__real = Fraction(re).limit_denominator(self.__max_denominator)
-        elif isinstance(re, (complex, Zi)):
+        elif isinstance(re, (complex, Gint)):
             self.__real = Fraction(re.real).limit_denominator(self.__max_denominator)
         else:
             raise TypeError(f"{re} is not a supported type")
 
-        if isinstance(re, (complex, Zi)):
+        if isinstance(re, (complex, Gint)):
             self.__imag = Fraction(re.imag).limit_denominator(self.__max_denominator)
         elif isinstance(im, Fraction):
             self.__imag = im
@@ -536,7 +533,7 @@ class Qi:
         return self.__imag
 
     def __repr__(self):
-        return f"Qi({repr(str(self.real))}, {repr(str(self.imag))})"
+        return f"Gauss({repr(str(self.real))}, {repr(str(self.imag))})"
 
     def __str__(self):
         if self.imag < 0:
@@ -546,7 +543,7 @@ class Qi:
 
     @gaussian_rational
     def __add__(self, other):
-        return Qi(self.real + other.real, self.imag + other.imag)
+        return Gauss(self.real + other.real, self.imag + other.imag)
 
     @gaussian_rational
     def __radd__(self, other):
@@ -554,7 +551,7 @@ class Qi:
 
     @gaussian_rational
     def __sub__(self, other):
-        return Qi(self.real - other.real, self.imag - other.imag)
+        return Gauss(self.real - other.real, self.imag - other.imag)
 
     @gaussian_rational
     def __rsub__(self, other):
@@ -570,9 +567,9 @@ class Qi:
         im = a * d + b * c
         # Return a Gaussian integer if the denominators are 1
         if re.denominator == 1 and im.denominator == 1:
-            return Zi(re.numerator, im.numerator)
+            return Gint(re.numerator, im.numerator)
         else:
-            return Qi(re, im)
+            return Gauss(re, im)
 
     @gaussian_rational
     def __rmul__(self, other):
@@ -582,7 +579,7 @@ class Qi:
         result = self
         if isinstance(n, int):
             if n == 0:
-                result = Qi(Fraction(1, 1), Fraction(0, 1))  # "1"
+                result = Gauss(Fraction(1, 1), Fraction(0, 1))  # "1"
             elif n > 0:
                 for _ in range(n - 1):
                     result = result * self
@@ -597,11 +594,11 @@ class Qi:
 
     @gaussian_rational
     def __rtruediv__(self, other):
-        """Returns other/self as a Gaussian rational, Qi"""
+        """Returns other/self as a Gaussian rational"""
         return other * self.inverse
 
     def __neg__(self):
-        return Qi(-self.real, -self.imag)
+        return Gauss(-self.real, -self.imag)
 
     def __complex__(self) -> complex:
         return complex(float(self.real), float(self.imag))
@@ -613,7 +610,7 @@ class Qi:
 
     @gaussian_rational
     def __ne__(self, other) -> bool:
-        """Return True if this Qi does NOT equal other."""
+        """Return True if this Gauss does NOT equal other."""
         return (self.real != other.real) or (self.imag != other.imag)
 
     def __hash__(self):
@@ -628,18 +625,18 @@ class Qi:
     def __rpow__(self, **kwargs):
         return NotImplemented
 
-    def __round__(self) -> Zi:
-        return Zi(round(self.real), round(self.imag))
+    def __round__(self) -> 'Gint':
+        return Gint(round(self.real), round(self.imag))
 
-    def __floor__(self) -> Zi:
-        return Zi(math.floor(self.real), math.floor(self.imag))
+    def __floor__(self) -> 'Gint':
+        return Gint(math.floor(self.real), math.floor(self.imag))
 
-    def __ceil__(self) -> Zi:
-        return Zi(math.ceil(self.real), math.ceil(self.imag))
+    def __ceil__(self) -> 'Gint':
+        return Gint(math.ceil(self.real), math.ceil(self.imag))
 
     @property
     def conjugate(self):
-        return Qi(self.real, -self.imag)
+        return Gauss(self.real, -self.imag)
 
     @property
     def norm(self) -> Fraction:
@@ -650,8 +647,8 @@ class Qi:
     def random(re1=-100, re2=100, im1=-100, im2=100):
         """Return a random Gaussian rational"""
         if re1 < re2 and im1 < im2 and re2 >= 1 and im2 >= 1:
-            numerator = Zi.random(re1, re2, im1, im2)
-            denominator = Zi.random(1, re2, 1, im2)
+            numerator = Gint.random(re1, re2, im1, im2)
+            denominator = Gint.random(1, re2, 1, im2)
         else:
             raise ValueError(f"Bad range")
         return numerator / denominator
@@ -660,28 +657,28 @@ class Qi:
     def inverse(self):
         conj = self.conjugate
         norm = self.norm
-        return Qi(conj.real / norm, conj.imag / norm)
+        return Gauss(conj.real / norm, conj.imag / norm)
 
     @staticmethod
     def eye():
-        """Return i = Qi(0, 1)"""
-        return Qi(0, 1)
+        """Return i = Gauss(0, 1)"""
+        return Gauss(0, 1)
 
     @staticmethod
     def units():
-        """Returns the list of four units, [1, -1, i, -i], as Qis."""
-        return [Qi(1), -Qi(1), Qi.eye(), -Qi.eye()]
+        """Returns the list of four units, [1, -1, i, -i], as Gauss values."""
+        return [Gauss(1), -Gauss(1), Gauss.eye(), -Gauss.eye()]
 
     def associates(self):
-        """Return a list of this Qi's three associates"""
-        us = Qi.units()
+        """Return a list of this Gauss's three associates"""
+        us = Gauss.units()
         return list(map(lambda u: u * self, us[1:]))  # skip multiplying by 1
 
     def is_associate(self, other):
-        """Return True if the other Qi is an associate of this Qi, return False otherwise"""
+        """Return True if the other Gauss is an associate of this Gauss, return False otherwise"""
         q = self / other
         if q:
-            if q in Zi.units():
+            if q in Gint.units():
                 return True
             else:
                 return False
@@ -690,7 +687,7 @@ class Qi:
 
     @staticmethod
     def string_to_rational(qi_str):
-        """Turn the string form of a Gaussian rational into a Gaussian rational."""
+        """Turn the string form of a Gaussian rational into a Gauss instance."""
 
         insides = qi_str[1:-2]  # Remove leading (and trailing j)
 
@@ -705,17 +702,17 @@ class Qi:
         # Split body of string into real & imag parts, based on imag sign
         if '+' in body:
             re, im = body.split('+')
-            return Qi(sign + re, im)
+            return Gauss(sign + re, im)
         elif '-' in body:
             re, im = body.split('-')
-            return Qi(sign + re, '-' + im)
+            return Gauss(sign + re, '-' + im)
         else:
             raise ValueError(f"Can't parse {qi_str}")
 
 
-# Pramana standard names
-Gauss = Qi
-"""Pramana standard alias for Qi (Gaussian Rational, Q[i])."""
+# Backward-compatible aliases (original mathematical names from Dr. Reich's library)
+Zi = Gint
+"""Backward-compatible alias: Zi is the mathematical name for Gint (Z[i])."""
 
-Gint = Zi
-"""Pramana standard alias for Zi (Gaussian Integer, Z[i])."""
+Qi = Gauss
+"""Backward-compatible alias: Qi is the mathematical name for Gauss (Q[i])."""
