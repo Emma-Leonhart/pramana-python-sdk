@@ -96,7 +96,7 @@ class TestGint(TestCase):
         self.assertEqual(complex(self.c1), (4+5j))
 
     def test_str(self):
-        self.assertEqual(str(self.c1), "(4+5j)")
+        self.assertEqual(str(self.c1), "4 + 5i")
 
     def test_equal(self):
         self.assertTrue(self.c1 == Gint(4, 5))
@@ -185,3 +185,65 @@ class TestGint(TestCase):
         from pramana import Zi
         self.assertIs(Zi, Gint)
         self.assertEqual(Zi(4, 5), Gint(4, 5))
+
+    # --- New v0.2.0 tests ---
+
+    def test_str_formatting(self):
+        self.assertEqual(str(Gint(3, 2)), "3 + 2i")
+        self.assertEqual(str(Gint(3, -2)), "3 - 2i")
+        self.assertEqual(str(Gint(3, 1)), "3 + i")
+        self.assertEqual(str(Gint(3, -1)), "3 - i")
+        self.assertEqual(str(Gint(0, 1)), "i")
+        self.assertEqual(str(Gint(0, -1)), "-i")
+        self.assertEqual(str(Gint(5, 0)), "5")
+        self.assertEqual(str(Gint(0, 0)), "0")
+        self.assertEqual(str(Gint(0, 3)), "3i")
+        self.assertEqual(str(Gint(0, -3)), "-3i")
+
+    def test_classification_properties(self):
+        self.assertTrue(Gint(5).is_real)
+        self.assertFalse(Gint(5, 3).is_real)
+        self.assertTrue(Gint(0, 3).is_purely_imaginary)
+        self.assertFalse(Gint(1, 3).is_purely_imaginary)
+        self.assertFalse(Gint(0, 0).is_purely_imaginary)
+        self.assertTrue(Gint(0, 0).is_zero)
+        self.assertFalse(Gint(1).is_zero)
+        self.assertTrue(Gint(5).is_integer)
+        self.assertFalse(Gint(5, 3).is_integer)
+        self.assertTrue(Gint(5, 3).is_gaussian_integer)
+        self.assertTrue(Gint(1).is_one)
+        self.assertFalse(Gint(2).is_one)
+        self.assertTrue(Gint(5).is_positive)
+        self.assertFalse(Gint(-5).is_positive)
+        self.assertFalse(Gint(0, 3).is_positive)
+        self.assertTrue(Gint(-5).is_negative)
+        self.assertFalse(Gint(5).is_negative)
+
+    def test_comparison_operators(self):
+        self.assertTrue(Gint(1, 0) < Gint(2, 0))
+        self.assertTrue(Gint(1, 2) < Gint(1, 3))
+        self.assertFalse(Gint(2, 0) < Gint(1, 0))
+        self.assertTrue(Gint(2, 0) > Gint(1, 0))
+        self.assertTrue(Gint(1, 0) <= Gint(1, 0))
+        self.assertTrue(Gint(1, 0) >= Gint(1, 0))
+        self.assertTrue(Gint(1, 0) <= Gint(2, 0))
+        self.assertTrue(Gint(2, 0) >= Gint(1, 0))
+
+    def test_pramana_identity(self):
+        g = Gint(3, 4)
+        self.assertEqual(g.pramana_key, "3,1,4,1")
+        self.assertTrue(g.pramana_id)  # UUID is non-empty
+        self.assertTrue(g.pramana_url.startswith("https://pramana-data.ca/entity/"))
+        self.assertEqual(g.pramana_label, "pra:num:3,1,4,1")
+        # Verify deterministic: same input = same id
+        g2 = Gint(3, 4)
+        self.assertEqual(g.pramana_id, g2.pramana_id)
+        # Different values give different ids
+        g3 = Gint(3, 5)
+        self.assertNotEqual(g.pramana_id, g3.pramana_id)
+
+    def test_static_constants(self):
+        self.assertEqual(Gint.ZERO, Gint(0, 0))
+        self.assertEqual(Gint.ONE, Gint(1, 0))
+        self.assertEqual(Gint.MINUS_ONE, Gint(-1, 0))
+        self.assertEqual(Gint.I, Gint(0, 1))

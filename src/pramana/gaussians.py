@@ -38,11 +38,15 @@ __original_license__ = "MIT"
 __original_version__ = "1.0.0"
 __original_source__ = "https://github.com/alreich/gaussian_integers"
 
+import builtins
 import math
+import uuid
 from fractions import Fraction
 from numbers import Complex
 from random import randint
 from functools import wraps
+
+PRAMANA_NAMESPACE = uuid.UUID("a6613321-e9f6-4348-8f8b-29d2a3c86349")
 
 
 def to_gaussian_rational(number):
@@ -125,10 +129,15 @@ class Gint:
             return f"Gint({self.real}, {self.imag})"
 
     def __str__(self) -> str:
-        if self.imag == 0:
-            return str(self.real)
-        else:
-            return str(complex(self))
+        re, im = self.real, self.imag
+        if im == 0:
+            return str(re)
+        im_part = "i" if im == 1 else "-i" if im == -1 else f"{im}i"
+        if re == 0:
+            return im_part
+        sign = " + " if im > 0 else " - "
+        abs_im_part = "i" if abs(im) == 1 else f"{abs(im)}i"
+        return f"{re}{sign}{abs_im_part}"
 
     # NOTE: Python ints and floats have both 'real' and 'imag' properties, so
     # no conversion to Gaussian integers is necessary to use them in the arithmetic
@@ -273,6 +282,79 @@ class Gint:
 
     def __rpow__(self, base):
         return NotImplemented
+
+    def __lt__(self, other):
+        if isinstance(other, (int, float)):
+            other = Gint(other)
+        if self.real != other.real:
+            return self.real < other.real
+        return self.imag < other.imag
+
+    def __le__(self, other):
+        return self == other or self < other
+
+    def __gt__(self, other):
+        if isinstance(other, (int, float)):
+            other = Gint(other)
+        if self.real != other.real:
+            return self.real > other.real
+        return self.imag > other.imag
+
+    def __ge__(self, other):
+        return self == other or self > other
+
+    # --- Classification properties ---
+
+    @property
+    def is_real(self) -> bool:
+        return self.imag == 0
+
+    @property
+    def is_purely_imaginary(self) -> bool:
+        return self.real == 0 and self.imag != 0
+
+    @property
+    def is_zero(self) -> bool:
+        return self.real == 0 and self.imag == 0
+
+    @property
+    def is_integer(self) -> bool:
+        return self.imag == 0
+
+    @property
+    def is_gaussian_integer(self) -> bool:
+        return True
+
+    @property
+    def is_one(self) -> bool:
+        return self.real == 1 and self.imag == 0
+
+    @property
+    def is_positive(self) -> bool:
+        return self.imag == 0 and self.real > 0
+
+    @property
+    def is_negative(self) -> bool:
+        return self.imag == 0 and self.real < 0
+
+    # --- Pramana identity ---
+
+    @property
+    def pramana_key(self) -> str:
+        return f"{self.real},1,{self.imag},1"
+
+    @property
+    def pramana_id(self) -> str:
+        canonical = f"{{{self.pramana_key}}}"
+        return str(uuid.uuid5(PRAMANA_NAMESPACE, canonical))
+
+    @property
+    def pramana_url(self) -> str:
+        return f"https://pramana-data.ca/entity/{self.pramana_id}"
+
+    @property
+    def pramana_label(self) -> str:
+        return f"pra:num:{self.pramana_key}"
 
     @staticmethod
     def eye():
@@ -465,21 +547,31 @@ class Gint:
             return False
 
 
+Gint.ZERO = Gint(0, 0)
+Gint.ONE = Gint(1, 0)
+Gint.MINUS_ONE = Gint(-1, 0)
+Gint.I = Gint(0, 1)
+
+
 def isprime(n: int) -> bool:
     """Returns True if n is a positive, prime integer; otherwise, False is returned.
 
-    NOTE: A more efficient version of this function, by the same name, exists in SymPy.
+    Uses 6k±1 optimization for efficiency.
     """
-    if isinstance(n, int):
-        if n == 2:
-            return True
-        if n % 2 == 0 or n <= 1:
-            return False
-        root_n = int(math.sqrt(n)) + 1
-        for val in range(3, root_n, 2):
-            if n % val == 0:
-                return False
+    if not isinstance(n, int):
+        return False
+    if n <= 1:
+        return False
+    if n <= 3:
         return True
+    if n % 2 == 0 or n % 3 == 0:
+        return False
+    i = 5
+    while i * i <= n:
+        if n % i == 0 or n % (i + 2) == 0:
+            return False
+        i += 6
+    return True
 
 
 class Gauss:
@@ -625,6 +717,215 @@ class Gauss:
     def __rpow__(self, **kwargs):
         return NotImplemented
 
+    def __lt__(self, other):
+        other = to_gaussian_rational(other)
+        if self.real != other.real:
+            # Cross-multiply to compare: self.real.num * other.real.den vs other.real.num * self.real.den
+            return self.real < other.real
+        return self.imag < other.imag
+
+    def __le__(self, other):
+        return self == other or self < other
+
+    def __gt__(self, other):
+        other = to_gaussian_rational(other)
+        if self.real != other.real:
+            return self.real > other.real
+        return self.imag > other.imag
+
+    def __ge__(self, other):
+        return self == other or self > other
+
+    # --- Classification properties ---
+
+    @property
+    def is_real(self) -> bool:
+        return self.imag == Fraction(0)
+
+    @property
+    def is_purely_imaginary(self) -> bool:
+        return self.real == Fraction(0) and self.imag != Fraction(0)
+
+    @property
+    def is_zero(self) -> bool:
+        return self.real == Fraction(0) and self.imag == Fraction(0)
+
+    @property
+    def is_integer(self) -> bool:
+        return self.imag == Fraction(0) and self.real.denominator == 1
+
+    @property
+    def is_gaussian_integer(self) -> bool:
+        return self.real.denominator == 1 and self.imag.denominator == 1
+
+    @property
+    def is_one(self) -> bool:
+        return self.real == Fraction(1) and self.imag == Fraction(0)
+
+    @property
+    def is_positive(self) -> bool:
+        return self.imag == Fraction(0) and self.real > 0
+
+    @property
+    def is_negative(self) -> bool:
+        return self.imag == Fraction(0) and self.real < 0
+
+    # --- Pramana identity ---
+
+    @property
+    def pramana_key(self) -> str:
+        return f"{self.real.numerator},{self.real.denominator},{self.imag.numerator},{self.imag.denominator}"
+
+    @property
+    def pramana_id(self) -> str:
+        canonical = f"{{{self.pramana_key}}}"
+        return str(uuid.uuid5(PRAMANA_NAMESPACE, canonical))
+
+    @property
+    def pramana_url(self) -> str:
+        return f"https://pramana-data.ca/entity/{self.pramana_id}"
+
+    @property
+    def pramana_label(self) -> str:
+        return f"pra:num:{self.pramana_key}"
+
+    # --- String formatting ---
+
+    def to_raw_string(self) -> str:
+        """Return <A,B,C,D> format."""
+        r = self.real
+        i = self.imag
+        return f"<{r.numerator},{r.denominator},{i.numerator},{i.denominator}>"
+
+    def to_improper_string(self) -> str:
+        """Return improper fraction format like '7/2 + 1/4 i'."""
+        re_str = str(self.real)
+        im = self.imag
+        if im == Fraction(0):
+            return re_str
+        abs_im = abs(im)
+        im_str = "i" if abs_im == Fraction(1) else f"{abs_im}i"
+        if self.real == Fraction(0):
+            return im_str if im > 0 else f"-{im_str}"
+        sign = " + " if im > 0 else " - "
+        return f"{re_str}{sign}{im_str}"
+
+    def to_mixed_string(self) -> str:
+        """Return human-readable mixed fraction format like '3 & 1/2 + 1/4 i'."""
+        def _mixed(f):
+            if f.denominator == 1:
+                return str(f.numerator)
+            whole = int(f)
+            remainder = abs(f - whole)
+            if whole == 0:
+                return str(f)
+            if remainder == Fraction(0):
+                return str(whole)
+            sign = "-" if f < 0 else ""
+            return f"{sign}{abs(whole)} & {remainder}"
+
+        re_str = _mixed(self.real)
+        im = self.imag
+        if im == Fraction(0):
+            return re_str
+        abs_im = abs(im)
+        abs_im_str = "i" if abs_im == Fraction(1) else f"{_mixed(abs_im)}i"
+        if self.real == Fraction(0):
+            if im > 0:
+                return abs_im_str
+            return f"-{abs_im_str}"
+        sign = " + " if im > 0 else " - "
+        return f"{re_str}{sign}{abs_im_str}"
+
+    def to_decimal_string(self, precision=15) -> str:
+        """Return decimal format like '3.5 + 0.25i'."""
+        re_val = float(self.real)
+        im_val = float(self.imag)
+
+        def _fmt(v):
+            if v == int(v):
+                return str(int(v))
+            return f"{v:.{precision}g}"
+
+        re_str = _fmt(re_val)
+        if im_val == 0:
+            return re_str
+        abs_im = abs(im_val)
+        im_str = "i" if abs_im == 1.0 else f"{_fmt(abs_im)}i"
+        if re_val == 0:
+            return im_str if im_val > 0 else f"-{im_str}"
+        sign = " + " if im_val > 0 else " - "
+        return f"{re_str}{sign}{im_str}"
+
+    # --- Parsing ---
+
+    @staticmethod
+    def parse(s: str) -> 'Gauss':
+        """Parse from canonical 'A,B,C,D' format."""
+        parts = s.strip().split(",")
+        if len(parts) != 4:
+            raise ValueError(f"Expected 'A,B,C,D' format, got: {s}")
+        a, b, c, d = [int(x.strip()) for x in parts]
+        return Gauss(Fraction(a, b), Fraction(c, d))
+
+    @staticmethod
+    def from_pramana(s: str) -> 'Gauss':
+        """Parse from 'pra:num:A,B,C,D' format."""
+        prefix = "pra:num:"
+        if not s.startswith(prefix):
+            raise ValueError(f"Expected format 'pra:num:A,B,C,D', got: {s}")
+        return Gauss.parse(s[len(prefix):])
+
+    # --- Static math methods ---
+
+    @staticmethod
+    def floor(value: 'Gauss') -> 'Gint':
+        return Gint(math.floor(value.real), math.floor(value.imag))
+
+    @staticmethod
+    def ceil(value: 'Gauss') -> 'Gint':
+        return Gint(math.ceil(value.real), math.ceil(value.imag))
+
+    @staticmethod
+    def truncate(value: 'Gauss') -> 'Gint':
+        return Gint(math.trunc(value.real), math.trunc(value.imag))
+
+    @staticmethod
+    def min(*args):
+        return builtins.min(args)
+
+    @staticmethod
+    def max(*args):
+        return builtins.max(args)
+
+    @staticmethod
+    def clamp(value: 'Gauss', min_val: 'Gauss', max_val: 'Gauss') -> 'Gauss':
+        if value < min_val:
+            return min_val
+        if value > max_val:
+            return max_val
+        return value
+
+    @staticmethod
+    def sign(value: 'Gauss') -> int:
+        """Return sign for real Gauss values: -1, 0, or 1."""
+        if value.imag != Fraction(0):
+            raise ValueError("sign is only defined for real values")
+        if value.real > 0:
+            return 1
+        elif value.real < 0:
+            return -1
+        return 0
+
+    @staticmethod
+    def exact_abs(value: 'Gauss') -> 'Gauss':
+        """Return exact absolute value for real Gauss values."""
+        if value.imag != Fraction(0):
+            raise ValueError("exact_abs is only defined for real values")
+        if value.real < 0:
+            return Gauss(-value.real)
+        return Gauss(value.real)
+
     def __round__(self) -> 'Gint':
         return Gint(round(self.real), round(self.imag))
 
@@ -709,6 +1010,11 @@ class Gauss:
         else:
             raise ValueError(f"Can't parse {qi_str}")
 
+
+Gauss.ZERO = Gauss(0, 0)
+Gauss.ONE = Gauss(1, 0)
+Gauss.MINUS_ONE = Gauss(-1, 0)
+Gauss.I = Gauss(0, 1)
 
 # Backward-compatible aliases (original mathematical names from Dr. Reich's library)
 Zi = Gint
